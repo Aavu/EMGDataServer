@@ -23,15 +23,27 @@ Error_t Server::init(CoAmp* pSensor, int port, int iPacketSize) {
 
     m_piDataChunk = new Data_t<uint16_t>(m_iBlockSize, m_iNumChannels);
     transmissionData.buffer = new uint16_t [m_iBlockSize * m_iNumChannels];
+//    m_pReceivedMsg = new char [m_iReceivedMsgSize];
     return kNoError;
 }
 
-Error_t Server::start() {
+Error_t Server::run(int iTimeoutInSec) {
     m_bRunning = true;
     auto err = m_server.start();
     if (err)
         return err;
     m_pThread =  new std::thread(&Server::threadCallback, this);
+    m_pReceiveThread =  new std::thread(&Server::receiveCallback, this);
+    std::unique_lock<std::mutex> lock(m_mtx);
+    if(iTimeoutInSec < 0) {
+        m_cv.wait(lock, [this] {return !isRunning();});
+    } else {
+        m_cv.wait_for(lock, std::chrono::seconds(iTimeoutInSec), [this] {return !isRunning();});
+    }
+    if (m_bRunning)
+        stop();
+
+    joinThreads();
     return kNoError;
 }
 
@@ -63,12 +75,6 @@ void Server::threadCallback() {
 Error_t Server::stop() {
     LOG_DEBUG("Stopping server.");
     m_bRunning = false;
-    if (m_pThread == nullptr) {
-        if (m_pThread->joinable())
-            m_pThread->join();
-        delete m_pThread;
-        m_pThread = nullptr;
-    }
     return kNoError;
 }
 
@@ -79,4 +85,38 @@ void Server::signalHandler(int sig) {
 
 Server::Server() : m_bRunning(false) {
 
+}
+
+void Server::receiveCallback() {
+    while (m_bRunning) {
+        auto err = m_server.receive(&m_iReceivedMsg);
+        if (err != kNoError)
+            break;
+
+        if (m_iReceivedMsg == Exit) {
+            break;
+        }
+    }
+    stop();
+    m_cv.notify_one();
+}
+
+bool Server::isRunning() {
+    return m_bRunning;
+}
+
+void Server::joinThreads() {
+    if (m_pThread) {
+        if (m_pThread->joinable())
+            m_pThread->join();
+        delete m_pThread;
+        m_pThread = nullptr;
+    }
+
+    if (m_pReceiveThread) {
+        if (m_pReceiveThread->joinable())
+            m_pReceiveThread->join();
+        delete m_pReceiveThread;
+        m_pReceiveThread = nullptr;
+    }
 }

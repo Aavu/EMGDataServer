@@ -18,10 +18,7 @@ int main() {
     Server* pServer = Server::getInstance();
     pServer->init(pSensor, 8080, 128);
 
-    pServer->start();
-//    std::cout << "Hello, World!" << std::endl;
-    Time::sleep(5);
-    pServer->stop();
+    pServer->run(5);
 
     delete pSensor;
     delete pServer;

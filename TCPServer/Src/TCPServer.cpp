@@ -6,7 +6,6 @@
 
 Error_t TCPServer::init(int port) {
     m_iPort = port;
-
     bzero(&m_serverAddress, sizeof(m_serverAddress));
     m_serverAddress.sin_family = AF_INET;
     m_serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -85,7 +84,7 @@ Error_t TCPServer::send(data_t *pData_t, int iNumValues) const {
 }
 
 TCPServer::~TCPServer() {
-    close(m_connfd);
+    close(m_sockfd);
 }
 
 Error_t TCPServer::acceptClient() {
@@ -96,5 +95,18 @@ Error_t TCPServer::acceptClient() {
         return kUnknownError;
     }
     LOG_INFO("Client successfully connected to the server!");
+    return kNoError;
+}
+
+Error_t TCPServer::receive(uint8_t* pMsg) const {
+    auto ret = recv(m_connfd, pMsg, sizeof(uint8_t), MSG_WAITALL);
+    if (ret == -1) {
+        LOG_ERROR("Server receive error.");
+        return kFileReadError;
+    } else if (ret == 0) {
+        LOG_INFO("Received EOF.");
+    } else if (ret != (int)sizeof(uint8_t)) {
+        LOG_WARN("Server received less bytes than requested");
+    }
     return kNoError;
 }

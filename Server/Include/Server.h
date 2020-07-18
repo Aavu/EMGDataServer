@@ -13,16 +13,26 @@
 
 class Server {
 public:
+    enum Message {
+        Stop = 0,
+        Exit,
+        Start,
+    };
+
     ~Server();
     static Server* getInstance();
     Error_t init(CoAmp* pSensor, int port=8080, int iPacketSize=128);
-    Error_t start();
+    Error_t run(int iTimeoutInSec=10);
     Error_t stop();
+    bool isRunning();
 
 private:
     Server();
     void threadCallback();
     static void signalHandler(int sig);
+    void receiveCallback();
+
+    void joinThreads();
 
     TCPServer::data_t transmissionData;
 
@@ -31,12 +41,18 @@ private:
 
     TCPServer m_server;
     std::thread* m_pThread = nullptr;
+    std::thread* m_pReceiveThread = nullptr;
 
     std::atomic<bool> m_bRunning;
 
     Data_t<uint16_t>* m_piDataChunk = nullptr;
     int m_iBlockSize    = 0;
     int m_iNumChannels  = 0;
+
+    std::mutex m_mtx;
+    std::condition_variable m_cv;
+
+    uint8_t m_iReceivedMsg = 0;
 };
 
 

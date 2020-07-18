@@ -190,7 +190,7 @@ void SocketCAN::start_receiver_thread()
     int rc = pthread_create(&receiver_thread_id, nullptr, &socketcan_receiver_thread, this);
     if (rc != 0)
     {
-        LOG_ERROR("Unable to start receiver thread");
+        LOG_ERROR("Unable to run receiver thread");
         return;
     }
     LOG_DEBUG("Successfully started receiver thread with ID {0}.\n", (int) receiver_thread_id);

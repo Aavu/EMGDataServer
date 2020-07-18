@@ -24,6 +24,8 @@ public:
     Error_t send(uint16_t* pEMGSamples, int iNumValues) const;
     Error_t send(data_t *pData_t, int iNumValues) const;
 
+    Error_t receive(uint8_t* pMsg) const;
+
 private:
     Error_t acceptClient();
     Error_t setSocketOptions() const;
