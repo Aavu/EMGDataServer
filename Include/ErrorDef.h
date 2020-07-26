@@ -13,8 +13,10 @@ enum Error_t {
     kFileExtensionError,
     kFilePathNullError,
     kFileOpenError,
+    kFileCloseError,
     kFileReadError,
     kFileWriteError,
+    kFileEOFError,
 
     kSetValueError,
     kGetValueError,

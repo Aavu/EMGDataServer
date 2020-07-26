@@ -34,7 +34,7 @@ private:
 
     void joinThreads();
 
-    TCPServer::data_t transmissionData;
+    uint16_t* m_iTransmissionData = nullptr;
 
     static Server* pInstance;
     CoAmp* m_pSensor = nullptr;

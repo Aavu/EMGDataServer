@@ -56,7 +56,7 @@ private:
     int m_iChannels;
     int m_iHopLength;
     T* m_ptBuffer;
-    Data_t<float>* m_pfDataBuffer;
+//    Data_t<float>* m_pfDataBuffer;
 
     int m_iWriteIdx             = 0;
     int m_iReadIdx              = 0;

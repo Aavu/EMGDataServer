@@ -13,7 +13,7 @@ RingBuffer<T>::RingBuffer(  size_t iMaxSize,
                             m_iLength(0),
                             m_iChannels(iNumChannels),
                             m_iHopLength(iHopLength),
-                            m_pfDataBuffer(nullptr),
+//                            m_pfDataBuffer(nullptr),
                             m_bufferState(Empty),
                             m_mode(mode)
 {

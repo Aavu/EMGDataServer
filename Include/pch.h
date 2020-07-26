@@ -23,6 +23,9 @@
 #include <csignal>
 #include <iomanip>
 
+#include <sys/file.h>
+#include <cerrno>
+
 #include <cstdio>
 #include <netinet/in.h>
 #include <cstdlib>

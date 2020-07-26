@@ -22,8 +22,7 @@ Error_t Server::init(CoAmp* pSensor, int port, int iPacketSize) {
         return err;
 
     m_piDataChunk = new Data_t<uint16_t>(m_iBlockSize, m_iNumChannels);
-    transmissionData.buffer = new uint16_t [m_iBlockSize * m_iNumChannels];
-//    m_pReceivedMsg = new char [m_iReceivedMsgSize];
+    m_iTransmissionData = new uint16_t [(m_iBlockSize + 1) * m_iNumChannels];
     return kNoError;
 }
 
@@ -40,6 +39,7 @@ Error_t Server::run(int iTimeoutInSec) {
     } else {
         m_cv.wait_for(lock, std::chrono::seconds(iTimeoutInSec), [this] {return !isRunning();});
     }
+
     if (m_bRunning)
         stop();
 
@@ -49,7 +49,7 @@ Error_t Server::run(int iTimeoutInSec) {
 
 Server::~Server() {
     delete m_piDataChunk;
-    delete [] transmissionData.buffer;
+    delete [] m_iTransmissionData;
 }
 
 void Server::threadCallback() {
@@ -58,13 +58,13 @@ void Server::threadCallback() {
         if (!m_pSensor->isAvailable(m_iBlockSize))
             continue;
 
-        auto err = m_pSensor->getSamples(transmissionData.buffer, m_iBlockSize);
+        Time::getTimeStamp(m_iTransmissionData);
+        auto offset = m_iNumChannels;
+        auto err = m_pSensor->getSamples(&m_iTransmissionData[offset], m_iBlockSize);
         if (err != kNoError)
             break;
 
-        strcpy(transmissionData.timeStamp, Time::getTimeStamp().c_str());
-//        std::cout << transmissionData.timeStamp << std::endl;
-        err = m_server.send(&transmissionData, m_iBlockSize*m_iNumChannels);
+        err = m_server.send(m_iTransmissionData, (m_iBlockSize + 1)*m_iNumChannels);
 //        err = m_server.send(m_piDataChunk->getSamplesPointer(), m_iBlockSize*m_iNumChannels);
         if (err != kNoError)
             break;
@@ -93,7 +93,8 @@ void Server::receiveCallback() {
         if (err != kNoError)
             break;
 
-        if (m_iReceivedMsg == Exit) {
+        if (m_iReceivedMsg == '1') {
+//            std::cout << m_iReceivedMsg << std::endl;
             break;
         }
     }
@@ -112,10 +113,10 @@ void Server::joinThreads() {
         delete m_pThread;
         m_pThread = nullptr;
     }
-
     if (m_pReceiveThread) {
-        if (m_pReceiveThread->joinable())
+        if (m_pReceiveThread->joinable()) {
             m_pReceiveThread->join();
+        }
         delete m_pReceiveThread;
         m_pReceiveThread = nullptr;
     }

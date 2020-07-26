@@ -45,6 +45,15 @@ Error_t TCPServer::setSocketOptions() const {
         return kUnknownError;
     }
 
+    /* This affects the accept function too. So not using it. */
+
+//    struct timeval tv{1, 0};
+//
+//    if(setsockopt(m_sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv) < 0) {
+//        LOG_ERROR("set socket option (Receive timeout) failed");
+//        return kUnknownError;
+//    }
+
     return kNoError;
 }
 
@@ -55,24 +64,33 @@ Error_t TCPServer::start() {
     }
 
     LOG_INFO("TCP Server listening.");
-
     return acceptClient();
 }
 
-Error_t TCPServer::send(uint16_t *pEMGSamples, int iNumValues) const {
-    int nBytes = int(sizeof(uint16_t)) * iNumValues;
-    int ret = write(m_connfd, pEMGSamples, nBytes);
-//    std::cout << "ret: " << ret << "\tsize: " << nBytes << std::endl;
-    if (ret != nBytes) {
-        LOG_ERROR("TCP connFD write error. {}", errno);
-        return kFileWriteError;
-    }
+//Error_t TCPServer::send(uint16_t *pEMGSamples, int iNumValues) const {
+//    int nBytes = int(sizeof(uint16_t)) * iNumValues;
+//    int ret = write(m_connfd, pEMGSamples, nBytes);
+////    std::cout << "ret: " << ret << "\tsize: " << nBytes << std::endl;
+//    if (ret != nBytes) {
+//        LOG_ERROR("TCP connFD write error. {}", errno);
+//        return kFileWriteError;
+//    }
+//
+//    return kNoError;
+//}
 
-    return kNoError;
-}
+Error_t TCPServer::send(uint16_t *pData_t, int iNumValues) const {
+    int nBytes = (int(sizeof(uint16_t)) * iNumValues); // + (int(sizeof(char)) * Time::timeStampSize);
 
-Error_t TCPServer::send(data_t *pData_t, int iNumValues) const {
-    int nBytes = (int(sizeof(uint16_t)) * iNumValues) + (int(sizeof(char)) * Time::timeStampSize);
+//    for (int i=0; i<129; i++) {
+//        std::cout << i << "\t";
+//        for(int j=0; j<8; j++) {
+//            std::cout << pData_t[(i*8) + j] << "\t";
+//        }
+//        std::cout << std::endl;
+//    }
+//    std::cout << std::endl;
+
     int ret = write(m_connfd, pData_t, nBytes);
 //    std::cout << "ret: " << ret << "\tsize: " << nBytes << std::endl;
     if (ret != nBytes) {
@@ -84,7 +102,7 @@ Error_t TCPServer::send(data_t *pData_t, int iNumValues) const {
 }
 
 TCPServer::~TCPServer() {
-    close(m_sockfd);
+    stop();
 }
 
 Error_t TCPServer::acceptClient() {
@@ -104,9 +122,17 @@ Error_t TCPServer::receive(uint8_t* pMsg) const {
         LOG_ERROR("Server receive error.");
         return kFileReadError;
     } else if (ret == 0) {
-        LOG_INFO("Received EOF.");
+        LOG_INFO("Peer closed connection.");
+        return kFileEOFError;
     } else if (ret != (int)sizeof(uint8_t)) {
         LOG_WARN("Server received less bytes than requested");
     }
+    return kNoError;
+}
+
+Error_t TCPServer::stop() const {
+    auto ret = close(m_sockfd);
+    if (ret != 0)
+        return kFileCloseError;
     return kNoError;
 }

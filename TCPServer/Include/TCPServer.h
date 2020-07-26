@@ -20,9 +20,10 @@ public:
     ~TCPServer();
     Error_t init(int port);
     Error_t start();
+    Error_t stop() const;
 
-    Error_t send(uint16_t* pEMGSamples, int iNumValues) const;
-    Error_t send(data_t *pData_t, int iNumValues) const;
+//    Error_t send(uint16_t* pEMGSamples, int iNumValues) const;
+    Error_t send(uint16_t *pData_t, int iNumValues) const;
 
     Error_t receive(uint8_t* pMsg) const;
 
