@@ -11,8 +11,9 @@ Server *Server::getInstance() {
     return pInstance;
 }
 
-Error_t Server::init(CoAmp* pSensor, int port, int iPacketSize) {
+Error_t Server::init(CoAmp* pSensor, KeyLogger* pKeyLogger, int port, int iPacketSize) {
     m_pSensor = pSensor;
+    m_pKeyLogger = pKeyLogger;
     m_iBlockSize = iPacketSize;
     m_iNumChannels = CoAmp::NUM_EMG_CHANNELS;
 

@@ -7,8 +7,9 @@
 
 #include "TCPServer.h"
 #include "CoAmp.h"
+#include "KeyLogger.h"
 #include "pch.h"
-#include "Time.h"
+#include "MyTime.h"
 #include "ErrorDef.h"
 
 class Server {
@@ -19,9 +20,13 @@ public:
         Start,
     };
 
+    // Deleting Copy constructor
+    Server (const Server&) = delete;
+    Server& operator= (const Server&) = delete;
+
     ~Server();
     static Server* getInstance();
-    Error_t init(CoAmp* pSensor, int port=8080, int iPacketSize=128);
+    Error_t init(CoAmp* pSensor, KeyLogger* pKeyLogger, int port=8080, int iPacketSize=128);
     Error_t run(int iTimeoutInSec=10);
     Error_t stop();
     bool isRunning();
@@ -38,6 +43,7 @@ private:
 
     static Server* pInstance;
     CoAmp* m_pSensor = nullptr;
+    KeyLogger* m_pKeyLogger = nullptr;
 
     TCPServer m_server;
     std::thread* m_pThread = nullptr;

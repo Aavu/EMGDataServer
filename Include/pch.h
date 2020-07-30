@@ -33,4 +33,7 @@
 #include <sys/socket.h>
 #include <sstream>
 
+#include <sys/ioctl.h>
+#include <termios.h>
+
 #endif //GOOGLEDRUMMINGARM_PCH_H

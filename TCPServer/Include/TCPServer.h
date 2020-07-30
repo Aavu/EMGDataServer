@@ -6,17 +6,12 @@
 #define EMGDATASERVER_TCPSERVER_H
 
 #include "pch.h"
-#include "Time.h"
+#include "MyTime.h"
 #include "Logger.h"
 #include "ErrorDef.h"
 
 class TCPServer {
 public:
-    struct data_t {
-        char timeStamp[Time::timeStampSize];
-        uint16_t* buffer;
-    };
-
     ~TCPServer();
     Error_t init(int port);
     Error_t start();

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Server.h"
 #include "CoAmp.h"
+#include "KeyLogger.h"
 
 #define APP "EMGDataServer"
 
@@ -15,8 +16,10 @@ int main() {
 
     auto pid = getpid();
     write(pid_file, &pid, sizeof(pid_t));
+
     Logger::init(Logger::trace);
 
+    // EMG Sensors
     CoAmp::SensorParam_t sensorParam;
     sensorParam.iWindowLength = 256;
     sensorParam.iHopLength = 256;
@@ -24,8 +27,11 @@ int main() {
     CoAmp* pSensor = CoAmp::getInstance();
     pSensor->init(sensorParam);
 
+    // Key Logger
+    auto* pKeyLogger = KeyLogger::getInstance();
+
     Server* pServer = Server::getInstance();
-    pServer->init(pSensor, 8080, 128);
+    pServer->init(pSensor, pKeyLogger, 8080, 128);
 
     pServer->run(-1);
 

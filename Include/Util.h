@@ -14,7 +14,7 @@
 
 class Util {
 public:
-    static int argmax(float* pfArray, size_t iLength) {
+    static int argMax(float* pfArray, size_t iLength) {
         return std::distance(pfArray, std::max_element(pfArray, pfArray + iLength));
     }
 
@@ -33,6 +33,10 @@ public:
             }
         }
         return res;
+    }
+
+    static int char2Int(char key) {
+        return key - '0';
     }
 };
 

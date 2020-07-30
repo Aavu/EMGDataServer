@@ -177,7 +177,7 @@ Error_t CoAmp::getData(Data_t<uint16_t> *piData) {
         return kNotInitializedError;
     auto* piSamples = piData->getSamplesPointer();
     auto n = piData->getNumSamples();
-    piData->setTimeStamp(Time::getTimeStamp()); // Not the best place to put. But a good approximation
+//    piData->setTimeStamp(Time::getTimeStamp()); // Not the best place to put. But a good approximation
     return getSamples(piSamples, n);
 }
 
@@ -186,7 +186,7 @@ Error_t CoAmp::getData(Data_t<float> *pfData) {
         return kNotInitializedError;
     auto* pfSamples = pfData->getSamplesPointer();
     auto n = pfData->getNumSamples();
-    pfData->setTimeStamp(Time::getTimeStamp()); // Not the best place to put. But a good approximation
+//    pfData->setTimeStamp(Time::getTimeStamp()); // Not the best place to put. But a good approximation
     return getSamples(pfSamples, n);
 }
 

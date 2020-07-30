@@ -6,7 +6,7 @@
 #define GOOGLEDRUMMINGARM_COAMP_H
 
 #include "pch.h"
-#include "Time.h"
+#include "MyTime.h"
 #include "SocketCAN.h"
 #include "Data.h"
 #include "RingBuffer.h"
@@ -26,6 +26,10 @@ public:
     static const uint8_t NUM_EMG_CHANNELS   = 8;
     static const uint8_t DEFAULT_GAIN       = 4;
     const uint16_t MAX_15                   = 1 << 15;  // Cannot use static variable with std::fill
+
+    // Deleting Copy constructor
+    CoAmp (const CoAmp&) = delete;
+    CoAmp& operator= (const CoAmp&) = delete;
 
     ~CoAmp();
     static CoAmp* getInstance();
